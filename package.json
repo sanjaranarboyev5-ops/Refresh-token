@@ -1,0 +1,32 @@
+{
+  "name": "auth-system-refresh-token",
+  "version": "1.0.0",
+  "description": "Authentication System with Access Token (3m) and Refresh Token (7d)",
+  "keywords": [
+    "auth",
+    "jwt",
+    "refresh-token",
+    "express"
+  ],
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node tests/auth.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {}
+}

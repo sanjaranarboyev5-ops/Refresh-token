@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication System — Access & Refresh Token</title>
+  <link rel="stylesheet" href="style.css?v=2.2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Navbar / Top Header -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-icon">🔐</div>
+        <div>
+          <div class="brand-title">Auth System</div>
+          <div class="brand-sub">Access (3m) &amp; Refresh (7d)</div>
+        </div>
+      </div>
+      <div class="checklist-badge-group">
+        <span class="status-pill active">✓ 1. Register</span>
+        <span class="status-pill active">✓ 2. JWT</span>
+        <span class="status-pill active">✓ 3. Login</span>
+        <span class="status-pill active">✓ 4. Logout</span>
+        <span class="status-pill active">✓ 5. 3m Access</span>
+        <span class="status-pill active">✓ 6. 7d Refresh</span>
+        <span class="status-pill active">✓ 7. Yangilash</span>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="content-wrapper">
+      
+      <!-- 1. AUTH FORM SECTION (Tizimga kirmagan paytda) -->
+      <section id="authSection" class="auth-card">
+        <div class="auth-tabs">
+          <button id="tabRegisterBtn" class="tab-pill active" onclick="switchTab('register')">Ro'yxatdan o'tish</button>
+          <button id="tabLoginBtn" class="tab-pill" onclick="switchTab('login')">Kirish (Login)</button>
+        </div>
+
+        <!-- Register -->
+        <form id="registerForm" class="auth-form active" onsubmit="handleRegister(event)">
+          <div class="form-title">Yangi hisob yaratish</div>
+          <div class="form-field">
+            <label for="regName">To'liq ism</label>
+            <input type="text" id="regName" placeholder="Ali Valiyev" required autocomplete="name">
+          </div>
+          <div class="form-field">
+            <label for="regEmail">Email manzil</label>
+            <input type="email" id="regEmail" placeholder="ali@misol.uz" required autocomplete="email">
+          </div>
+          <div class="form-field">
+            <label for="regPassword">Parol (kamida 6 belgi)</label>
+            <input type="password" id="regPassword" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Ro'yxatdan o'tish</button>
+          </div>
+        </form>
+
+        <!-- Login -->
+        <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+          <div class="form-title">Hisobga kirish</div>
+          <div class="form-field">
+            <label for="loginEmail">Email manzil</label>
+            <input type="email" id="loginEmail" placeholder="ali@misol.uz" required autocomplete="email">
+          </div>
+          <div class="form-field">
+            <label for="loginPassword">Parol</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Kirish</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 2. USER DASHBOARD SECTION (Tizimga kirilgandan keyin) -->
+      <section id="dashboardSection" class="dashboard-wrapper hidden">
+        
+        <!-- User Profile Banner Card -->
+        <div class="profile-card">
+          <div class="profile-left">
+            <div class="avatar" id="userAvatar">A</div>
+            <div class="profile-details">
+              <div class="profile-name-row">
+                <span class="user-fullname" id="profileName">Foydalanuvchi</span>
+                <span class="session-badge">Faol Sessiya</span>
+              </div>
+              <div class="user-email" id="profileEmail">email@misol.uz</div>
+              <div class="user-subid" id="profileId">ID: ...</div>
+            </div>
+          </div>
+          <div class="profile-right">
+            <button class="btn btn-ghost-danger" onclick="handleLogout()" title="Tizimdan chiqish">
+              <span>🚪</span> Chiqish
+            </button>
+          </div>
+        </div>
+
+        <!-- Token Cards (2 Ustun) -->
+        <div class="tokens-grid">
+          
+          <!-- Access Token (3m) Card -->
+          <div class="token-box" id="accessBox">
+            <div class="token-box-header">
+              <div class="token-box-label">
+                <span class="status-dot green" id="accessDot"></span>
+                <strong>Access Token</strong>
+                <span class="sub-tag">3 daqiqa</span>
+              </div>
+              <div class="timer-badge" id="accessCountdown">03:00</div>
+            </div>
+            
+            <div class="progress-track">
+              <div class="progress-bar" id="accessProgress" style="width: 100%;"></div>
+            </div>
+
+            <div class="token-snippet">
+              <code id="accessTokenPreview">token yuklanmoqda...</code>
+              <button class="mini-copy-btn" onclick="copyToken('accessToken')" title="Nusxalash">Nusxa</button>
+            </div>
+          </div>
+
+          <!-- Refresh Token (7d) Card -->
+          <div class="token-box" id="refreshBox">
+            <div class="token-box-header">
+              <div class="token-box-label">
+                <span class="status-dot blue"></span>
+                <strong>Refresh Token</strong>
+                <span class="sub-tag">7 kun</span>
+              </div>
+              <div class="timer-badge badge-neutral" id="refreshCountdown">7 kun</div>
+            </div>
+
+            <div class="progress-track">
+              <div class="progress-bar bar-blue" style="width: 100%;"></div>
+            </div>
+
+            <div class="token-snippet">
+              <code id="refreshTokenPreview">token yuklanmoqda...</code>
+              <button class="mini-copy-btn" onclick="copyToken('refreshToken')" title="Nusxalash">Nusxa</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dashboard Action Toolbar -->
+        <div class="actions-card">
+          <div class="actions-heading">Amallar va Sinovlar:</div>
+          <div class="actions-toolbar">
+            <button class="btn btn-outline" onclick="fetchProfile()">
+              <span>🛡️</span> Himoyalangan API (/profile)
+            </button>
+            <button class="btn btn-accent" onclick="handleRefreshToken()">
+              <span>🔄</span> Tokenni yangilash (/refresh)
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 3. API RESPONSE CONSOLE (Ixcham, pastda joylashgan) -->
+      <section class="console-card">
+        <div class="console-head">
+          <div class="console-title">
+            <span>📡</span> API So'rov va Javoblar jurnali
+          </div>
+          <button class="mini-clear-btn" onclick="clearLogs()">Tozalash</button>
+        </div>
+        <div class="console-list" id="consoleLogs">
+          <div class="log-item info">
+            <div class="log-meta">
+              <span class="log-route">[Tizim]</span>
+              <span class="log-clock">Hozir</span>
+            </div>
+            <div class="log-text">Tizim tayyor. Sinov uchun ro'yxatdan o'ting yoki tizimga kiring.</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      JWT Authentication System • Node.js, Express &amp; Bcryptjs
+    </footer>
+  </div>
+
+  <script src="app.js?v=2.2"></script>
+</body>
+</html>
